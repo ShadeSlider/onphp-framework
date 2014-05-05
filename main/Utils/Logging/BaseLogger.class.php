@@ -42,7 +42,7 @@
 		/**
 		 * @return Logger
 		**/
-		final public function log(LogLevel $level, $message)
+		public function log(LogLevel $level, $message)
 		{
 			$this->logRecord(
 				LogRecord::create()->
@@ -56,7 +56,7 @@
 		/**
 		 * @return Logger
 		**/
-		final public function logRecord(LogRecord $record)
+		public function logRecord(LogRecord $record)
 		{
 			$levelMatches =
 				$this->level === null
