@@ -172,7 +172,7 @@
 		
 		protected function makeSequenceName(DBColumn $column)
 		{
-			return $column->getTable()->getName().'_'.$column->getName();
+			return $column->getTable()->getName().'_'.$column->getName() . '_seq';
 		}
 		
 		private static function checkColumn(DBColumn $column)
