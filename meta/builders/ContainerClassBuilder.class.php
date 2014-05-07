@@ -64,7 +64,7 @@ EOT;
 
 public function getHelperTable()
 {
-	return '{$class->getTableName()}_{$remoteColumnName}';
+	return '{$class->getTableName()}__{$remoteColumnName}';
 }
 
 public function getChildIdField()

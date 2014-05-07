@@ -87,11 +87,12 @@
 			
 			return $this;
 		}
-		
+
 		/**
 		 * query methods
+		 * @return resource
 		**/
-		
+
 		public function queryRaw($queryString)
 		{
 			try {
@@ -215,9 +216,23 @@
 			try {
 				$res = pg_meta_data($this->link, $table);
 			} catch (BaseException $e) {
-				throw new ObjectNotFoundException(
-					"unknown table '{$table}'"
-				);
+				$tableDataRes = $this->queryRaw("
+					select c.relname
+						from pg_catalog.pg_class c
+						where
+								c.relkind = 'r'
+							and c.relname = '".$table."'
+				");
+				$tableData = pg_fetch_assoc($tableDataRes);
+
+				if(!empty($tableData['relname'])) {
+					$res = array();
+				}
+				else {
+					throw new ObjectNotFoundException(
+						"unknown table '{$table}'"
+					);
+				}
 			}
 			
 			$table = new DBTable($table);

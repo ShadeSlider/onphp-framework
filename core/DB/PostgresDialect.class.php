@@ -148,7 +148,8 @@
 			
 			return
 				'default nextval(\''
-				.$this->makeSequenceName($column).'\')';
+				.$this->makeSequenceName($column).'\');' . "\n"
+				.'ALTER SEQUENCE '.$this->makeSequenceName($column).' OWNED BY "'.$column->getTable()->getName().'"."'.$column->getName().'"';
 		}
 		
 		public function quoteIpInRange($range, $ip)

@@ -24,9 +24,11 @@
 		
 		private $defaultSource = null;
 		
-		private $forcedGeneration	= false;
-		private $dryRun				= false;
-		
+		private $forcedGeneration	    = false;
+		private $dryRun				    = false;
+		private $createTables		    = false;
+		private $runAlterTableQueries	= false;
+
 		private $checkEnumerationRefIntegrity = false;
 		
 		/**
@@ -75,6 +77,44 @@
 			return $this->dryRun;
 		}
 		
+		/**
+		 * @return MetaConfiguration
+		 */
+		public function setCreateTables($createTables)
+		{
+			$this->createTables = $createTables;
+
+			return $this;
+		}
+
+		/**
+		 * @return boolean
+		 */
+		public function isCreateTables()
+		{
+			return $this->createTables;
+		}
+
+		/**
+		 * @return boolean
+		 */
+		public function isRunAlterTableQueries()
+		{
+			return $this->runAlterTableQueries;
+		}
+
+		/**
+		 * @return MetaConfiguration
+		 */
+		public function setRunAlterTableQueries($runAlterTableQueries)
+		{
+			$this->runAlterTableQueries = $runAlterTableQueries;
+
+			return $this;
+		}
+
+
+
 		/**
 		 * @return MetaConfiguration
 		**/
@@ -302,10 +342,12 @@
 			$out = $this->getOutput();
 			$out->
 				newLine()->
-				infoLine('Suggested DB-schema changes: ');
-			
+				infoLine('DB-schema changes: ', true);
+
+			/** @var DBSchema $schema */
 			require ONPHP_META_AUTO_DIR.'schema.php';
-			
+
+			/** @var $class MetaClass */
 			foreach ($this->classes as $class) {
 				if (
 					$class->getTypeId() == MetaClassType::CLASS_ABSTRACT
@@ -333,7 +375,7 @@
 					
 					break;
 				}
-				
+
 				try {
 					$source = $db->getTableInfo($class->getTableName());
 				} catch (UnsupportedMethodException $e) {
@@ -347,26 +389,73 @@
 					
 					break;
 				} catch (ObjectNotFoundException $e) {
-					$out->errorLine(
-						"table '{$class->getTableName()}' not found, skipping."
-					);
-					continue;
+					if($this->isCreateTables()) {
+						try {
+							$db->queryRaw(
+								DBTable::create($class->getTableName())->
+								toDialectString($db->getDialect())
+							);
+							$out->remarkLine("Table '{$class->getTableName()}' created.");
+						} catch (DatabaseException $ee) {
+							$out->errorLine(
+								"Cannot create table '{$class->getTableName()}', skipping."
+							);
+						}
+					}
+					try {
+						$source = $db->getTableInfo($class->getTableName());
+					} catch (BaseException $ee) {
+						$out->errorLine(
+							"Cannot get info for table '{$class->getTableName()}'. Reason unknown..."
+						);
+						continue;
+					}
 				}
-				
+
 				$diff = DBTable::findDifferences(
 					$db->getDialect(),
 					$source,
 					$target
 				);
-				
+
+
 				if ($diff) {
-					foreach ($diff as $line)
+					if($this->isRunAlterTableQueries()) {
+						$out->remarkLine('Following SQL statements are now being executed: ');
+					}
+					else {
+						$out->remarkLine('Suggested changes: ');
+					}
+					foreach ($diff as $line) {
 						$out->warningLine($line);
-					
+						if($this->isRunAlterTableQueries()) {
+							$db->queryRaw($line);
+						}
+					}
+
 					$out->newLine();
 				}
 			}
-			
+
+			$classTables = array();
+			/** @var $class MetaClass */
+			foreach ($this->classes as $class) {
+				$classTables[$class->getTableName()] = 1;
+			}
+
+			$db = DBPool::me()->getLink();
+			foreach($schema->getTables() as $tableName => $table) {
+				if(!empty($classTables[$tableName]))
+					continue;
+
+
+				try {
+					$db->queryRaw($table->toDialectString($db->getDialect()));
+				} catch(DatabaseException $e) {
+					/* table already exists */
+				}
+			}
+
 			return $this;
 		}
 		
@@ -453,6 +542,7 @@
 			$formErrors = array();
 			
 			foreach ($this->classes as $name => $class) {
+				/** @var $class MetaClass */
 				if (
 					!(
 						$class->getPattern() instanceof SpookedClassPattern

@@ -38,6 +38,12 @@ Possible options:
 	--puml:
 		just create uml diagramm and die.
 
+	--create-tables:
+		create tables when needed.
+
+	--run-alter-table-queries:
+		run alter tables queries for suggested schema changes.
+
 <?php
 		exit(1);
 	}
@@ -133,7 +139,8 @@ Possible options:
 	$metaForce = $metaOnlyContainers = $metaNoSchema =
 	$metaNoSchemaCheck = $metaDropStaleFiles =
 	$metaNoIntegrityCheck = $metaDryRun = 
-	$metaCheckEnumerationRefIntegrity = $metaNoColor = $createPUML = false;
+	$metaCheckEnumerationRefIntegrity = $metaNoColor = $createPUML =
+	$createTables = $runAlterTableQueries = false;
 	
 	$args = $_SERVER['argv'];
 	array_shift($args);
@@ -180,8 +187,16 @@ Possible options:
 					
 					case '--puml':
 						$createPUML = true;
-						
 						break;
+
+					case '--create-tables':
+						$createTables = true;
+						break;
+
+					case '--run-alter-table-queries':
+						$runAlterTableQueries = true;
+						break;
+
 					default:
 						stop('Unknown switch: '.$arg);
 				}
@@ -303,6 +318,8 @@ Possible options:
 			
 			$meta->
 				setDryRun($metaDryRun)->
+				setCreateTables($createTables)->
+				setRunAlterTableQueries($runAlterTableQueries)->
 				load($pathMeta)->
 				setForcedGeneration($metaForce);
 			
@@ -326,7 +343,7 @@ Possible options:
 				
 				if (!$metaNoSchema)
 					$meta->buildSchema();
-				
+
 				if (!$metaNoSchemaCheck)
 					$meta->buildSchemaChanges();
 			}

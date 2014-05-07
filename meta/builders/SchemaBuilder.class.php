@@ -69,15 +69,15 @@ EOT;
 					} elseif (
 						$relation->getId() == MetaRelation::MANY_TO_MANY
 					) {
-						$tableName =
+						$junctionTableName =
 							$class->getTableName()
-							.'_'
+							.'__'
 							.$foreignClass->getTableName();
-						
-						if (isset($knownJunctions[$tableName]))
+
+						if (isset($knownJunctions[$junctionTableName]))
 							continue; // collision prevention
 						else
-							$knownJunctions[$tableName] = true;
+							$knownJunctions[$junctionTableName] = true;
 						
 						$foreignPropery = clone $foreignClass->getIdentifier();
 						
@@ -109,7 +109,7 @@ EOT;
 						$out .= <<<EOT
 \$schema->
 	addTable(
-		DBTable::create('{$tableName}')->
+		DBTable::create('{$junctionTableName}')->
 		{$property->toColumn()}->
 		{$foreignPropery->toColumn()}->
 		addUniques('{$property->getRelationColumnName()}', '{$foreignPropery->getColumnName()}')
@@ -117,6 +117,47 @@ EOT;
 
 
 EOT;
+
+						$sourceColumn = $property->getRelationColumnName();
+						$targetTable = $foreignClass->getTableName();
+						$targetColumn = $foreignClass->getIdentifier()->getColumnName();
+
+						$out .= <<<EOT
+// {$junctionTableName}.{$sourceColumn} -> {$targetTable}.{$targetColumn}
+\$schema->
+	getTableByName('{$junctionTableName}')->
+		getColumnByName('{$sourceColumn}')->
+			setReference(
+				\$schema->
+					getTableByName('{$targetTable}')->
+					getColumnByName('{$targetColumn}'),
+				ForeignChangeAction::cascade(),
+				ForeignChangeAction::cascade()
+			);
+
+
+EOT;
+
+						$sourceColumn = $foreignPropery->getRelationColumnName();
+						$targetTable = $class->getTableName();
+						$targetColumn = $class->getIdentifier()->getColumnName();
+
+						$out .= <<<EOT
+// {$junctionTableName}.{$sourceColumn} -> {$targetTable}.{$targetColumn}
+\$schema->
+	getTableByName('{$junctionTableName}')->
+		getColumnByName('{$sourceColumn}')->
+			setReference(
+				\$schema->
+					getTableByName('{$targetTable}')->
+					getColumnByName('{$targetColumn}'),
+				ForeignChangeAction::cascade(),
+				ForeignChangeAction::cascade()
+			);
+
+
+EOT;
+
 					} else {
 						$sourceTable = $class->getTableName();
 						$sourceColumn = $property->getRelationColumnName();

@@ -148,7 +148,7 @@
 		)
 		{
 			$out = array();
-			
+
 			$head = 'ALTER TABLE '.$dialect->quoteTable($target->getName());
 			
 			$sourceColumns = $source->getColumns();
@@ -206,10 +206,23 @@
 			
 			foreach ($targetColumns as $name => $column) {
 				if (!isset($sourceColumns[$name])) {
-					$out[] =
+
+					if($name == 'id') {
+						$out[] = $dialect->preAutoincrement($column);
+					}
+
+					$outStr =
 						$head
 						.' ADD COLUMN '
-						.$column->toDialectString($dialect).';';
+						.$column->toDialectString($dialect)
+					;
+
+					if($name == 'id') {
+						$outStr .= ' ' . $dialect->postAutoincrement($column);
+					}
+					$outStr .= ';';
+
+					$out[] = $outStr;
 					
 					if ($column->hasReference()) {
 						$out[] =
@@ -219,7 +232,7 @@
 					}
 				}
 			}
-			
+
 			return $out;
 		}
 	}
