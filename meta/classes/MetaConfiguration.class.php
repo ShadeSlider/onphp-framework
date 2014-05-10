@@ -28,6 +28,7 @@
 		private $dryRun				    = false;
 		private $createTables		    = false;
 		private $runAlterTableQueries	= false;
+		private $sqlLogFile	            = '';
 
 		private $checkEnumerationRefIntegrity = false;
 		
@@ -113,7 +114,22 @@
 			return $this;
 		}
 
+		/**
+		 * @return boolean
+		 */
+		public function getSqlLogFile()
+		{
+			return $this->sqlLogFile;
+		}
 
+		/**
+		 * @return MetaConfiguration
+		 */
+		public function setSqlLogFile($sqlLogFile)
+		{
+			$this->sqlLogFile = $sqlLogFile;
+			return $this;
+		}
 
 		/**
 		 * @return MetaConfiguration
@@ -339,6 +355,7 @@
 		**/
 		public function buildSchemaChanges()
 		{
+			$sqlLog = array();
 			$out = $this->getOutput();
 			$out->
 				newLine()->
@@ -391,11 +408,23 @@
 				} catch (ObjectNotFoundException $e) {
 					if($this->isCreateTables()) {
 						try {
-							$db->queryRaw(
+							$createTableSQL =
 								DBTable::create($class->getTableName())->
-								toDialectString($db->getDialect())
-							);
+									toDialectString($db->getDialect())
+							;
+
+							if(!$this->isDryRun()) {
+								$db->queryRaw($createTableSQL);
+							}
+
+							$out->remarkLine("Creating table '{$class->getTableName()}'...");
+							$out->warningLine($createTableSQL);
 							$out->remarkLine("Table '{$class->getTableName()}' created.");
+							$out->newLine();
+							$out->newLine();
+
+							$sqlLog[] = $createTableSQL;
+
 						} catch (DatabaseException $ee) {
 							$out->errorLine(
 								"Cannot create table '{$class->getTableName()}', skipping."
@@ -428,9 +457,10 @@
 					}
 					foreach ($diff as $line) {
 						$out->warningLine($line);
-						if($this->isRunAlterTableQueries()) {
+						if($this->isRunAlterTableQueries() && !$this->isDryRun()) {
 							$db->queryRaw($line);
 						}
+						$sqlLog[] = $line;
 					}
 
 					$out->newLine();
@@ -443,16 +473,57 @@
 				$classTables[$class->getTableName()] = 1;
 			}
 
-			$db = DBPool::me()->getLink();
-			foreach($schema->getTables() as $tableName => $table) {
-				if(!empty($classTables[$tableName]))
-					continue;
+			if($this->isCreateTables()) {
+				$db = DBPool::me()->getLink();
+				foreach($schema->getTables() as $tableName => $table) {
+					if(!empty($classTables[$tableName]))
+						continue;
+
+					try {
+						$createJunctionTableSQL = $table->toDialectString($db->getDialect());
+
+						if(!$this->isDryRun()) {
+							$db->queryRaw($createJunctionTableSQL);
+						}
+
+						$sqlLog[] = $createJunctionTableSQL;
+						$out->remarkLine("Creating junction table '{$tableName}'...");
+						$out->warningLine($createJunctionTableSQL);
+						$out->remarkLine("Table '{$tableName}' created.");
+						$out->newLine();
+						$out->newLine();
+					} catch(DatabaseException $e) {
+						/* table already exists */
+					}
+				}
+			}
 
 
-				try {
-					$db->queryRaw($table->toDialectString($db->getDialect()));
-				} catch(DatabaseException $e) {
-					/* table already exists */
+			if($this->getSqlLogFile() && count($sqlLog) && !$this->isDryRun()) {
+
+				$sqlLogFile = $this->getSqlLogFile();
+				$sqlLogFileDir = dirname($sqlLogFile);
+				if( (!is_writable($sqlLogFile) || !is_writable($sqlLogFileDir))
+					&& defined('PATH_BASE')
+				) {
+					$sqlLogFile = PATH_BASE . $this->getSqlLogFile();
+					$sqlLogFileDir = dirname($sqlLogFile);
+				}
+
+				if(is_writable($sqlLogFileDir) || is_writable($sqlLogFile)) {
+					try {
+						$fp = fopen($sqlLogFile, 'a');
+
+						fwrite($fp, "\n\n\n");
+						foreach ($sqlLog as $line) {
+							fwrite($fp, $line . "\n");
+						}
+						fwrite($fp, "\n\n");
+
+						fclose($fp);
+					} catch(BaseException $e) {
+						$out->errorLine("Cannot open file {$sqlLogFile}} for writing. Skipping...");
+					}
 				}
 			}
 

@@ -44,6 +44,9 @@ Possible options:
 	--run-alter-table-queries:
 		run alter tables queries for suggested schema changes.
 
+	--sql-log-file:
+		if supplied along with --create-tables and/or --run-alter-table-queries will write changes to the spicified file.
+
 <?php
 		exit(1);
 	}
@@ -140,7 +143,7 @@ Possible options:
 	$metaNoSchemaCheck = $metaDropStaleFiles =
 	$metaNoIntegrityCheck = $metaDryRun = 
 	$metaCheckEnumerationRefIntegrity = $metaNoColor = $createPUML =
-	$createTables = $runAlterTableQueries = false;
+	$createTables = $runAlterTableQueries = $sqlLogFile = false;
 	
 	$args = $_SERVER['argv'];
 	array_shift($args);
@@ -195,6 +198,10 @@ Possible options:
 
 					case '--run-alter-table-queries':
 						$runAlterTableQueries = true;
+						break;
+
+					case preg_match('/--sql-log-file=([a-zA-Z0-9-_.\/]+)/', $arg, $matches) ? true : false:
+						$sqlLogFile = $matches[1];
 						break;
 
 					default:
@@ -320,6 +327,7 @@ Possible options:
 				setDryRun($metaDryRun)->
 				setCreateTables($createTables)->
 				setRunAlterTableQueries($runAlterTableQueries)->
+				setSQLLogFile($sqlLogFile)->
 				load($pathMeta)->
 				setForcedGeneration($metaForce);
 			
