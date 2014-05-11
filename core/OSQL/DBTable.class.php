@@ -148,6 +148,7 @@
 		)
 		{
 			$out = array();
+			$postCreateTable = array();
 
 			$head = 'ALTER TABLE '.$dialect->quoteTable($target->getName());
 			
@@ -203,12 +204,15 @@
 						.' DROP COLUMN '.$dialect->quoteField($name).';';
 				}
 			}
-			
+
 			foreach ($targetColumns as $name => $column) {
 				if (!isset($sourceColumns[$name])) {
 
-					if($name == 'id') {
+					if($column->isAutoincrement()) {
 						$out[] = $dialect->preAutoincrement($column);
+						if(method_exists($dialect, 'postCreateTable')) {
+							$postCreateTable[] = $dialect->postCreateTable($target);
+						}
 					}
 
 					$outStr =
@@ -217,7 +221,7 @@
 						.$column->toDialectString($dialect)
 					;
 
-					if($name == 'id') {
+					if($column->isAutoincrement()) {
 						$outStr .= ' ' . $dialect->postAutoincrement($column);
 					}
 					$outStr .= ';';
@@ -232,6 +236,8 @@
 					}
 				}
 			}
+
+			$out = array_merge($out, $postCreateTable);
 
 			return $out;
 		}

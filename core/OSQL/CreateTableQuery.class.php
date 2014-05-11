@@ -78,8 +78,14 @@
 					$out .= ",\n    UNIQUE(".implode(', ', $names).')';
 				}
 			}
+
+			$out .= "\n);\n";
+
+			if(method_exists($dialect, 'postCreateTable')) {
+				$out .= $dialect->postCreateTable($this->table);
+			}
 			
-			return $out."\n);\n";
+			return $out;
 		}
 	}
 ?>

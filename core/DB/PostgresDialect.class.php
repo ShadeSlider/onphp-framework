@@ -148,8 +148,22 @@
 			
 			return
 				'default nextval(\''
-				.$this->makeSequenceName($column).'\');' . "\n"
-				.'ALTER SEQUENCE '.$this->makeSequenceName($column).' OWNED BY "'.$column->getTable()->getName().'"."'.$column->getName().'"';
+				.$this->makeSequenceName($column).'\')';
+
+		}
+
+		public function postCreateTable(DBTable $table)
+		{
+			$out = '';
+
+			/** @var DBColumn $column */
+			foreach($table->getColumns() as $name => $column) {
+				if($column->isAutoincrement()) {
+					$out .= 'ALTER SEQUENCE "'.$this->makeSequenceName($column).'" OWNED BY "'.$column->getTable()->getName().'"."'.$column->getName().'";';
+				}
+			}
+
+			return $out;
 		}
 		
 		public function quoteIpInRange($range, $ip)
