@@ -42,6 +42,10 @@
 		public function setDefault(DB $db)
 		{
 			$this->default = $db;
+
+			if(!$this->pool) {
+				$this->addLink('default', $db);
+			}
 			
 			return $this;
 		}
@@ -144,6 +148,11 @@
 				$db->disconnect();
 			
 			return $this;
+		}
+
+		public function getList()
+		{
+			return $this->pool;
 		}
 	}
 ?>

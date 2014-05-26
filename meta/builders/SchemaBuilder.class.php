@@ -56,14 +56,14 @@ EOT;
 				if ($relation = $property->getRelation()) {
 					
 					$foreignClass = $property->getType()->getClass();
-					
+
 					if (
 						$relation->getId() == MetaRelation::ONE_TO_MANY
 						// nothing to build, it's in the same table
 						// or table does not exist at all
 						|| !$foreignClass->getPattern()->tableExists()
 						// no need to process them
-						|| $class->getParent()
+						//|| $class->getParent() //Why???
 					) {
 						continue;
 					} elseif (

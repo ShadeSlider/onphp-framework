@@ -227,10 +227,14 @@
 					$outStr .= ';';
 
 					$out[] = $outStr;
-					
+
+					if($column->isAutoincrement()) {
+						$out[] = 'ALTER TABLE "'.$target->getName().'" ADD PRIMARY KEY("'.$column->getName().'");';
+					}
+
 					if ($column->hasReference()) {
 						$out[] =
-							'CREATE INDEX '.$dialect->quoteField($name.'_idx')
+							'CREATE INDEX '.$dialect->quoteField($name.'_idx' . '__' . $target->getName())
 							.' ON '.$dialect->quoteTable($target->getName()).
 							'('.$dialect->quoteField($name).');';
 					}
