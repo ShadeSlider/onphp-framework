@@ -16,7 +16,7 @@
 	{
 		public function import($scope)
 		{
-			if (isset($scope[$this->name]))
+			if (isset($scope[$this->name]) && $scope[$this->name] !== false)
 				$this->value = true;
 			else
 				$this->value = false;

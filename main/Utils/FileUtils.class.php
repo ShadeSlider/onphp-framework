@@ -202,6 +202,19 @@
 				"can not move {$source} to {$target}"
 			);
 		}
+
+		public static function copy($source, $target)
+		{
+			if (
+				is_readable($source)
+				&& is_writable(pathinfo($target, PATHINFO_DIRNAME))
+			)
+				return copy($source, $target);
+
+			throw new WrongArgumentException(
+				"can not copy {$source} to {$target}"
+			);
+		}
 		
 		public static function unlink($filePath)
 		{

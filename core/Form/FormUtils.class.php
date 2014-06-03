@@ -12,7 +12,7 @@
 	/**
 	 * @ingroup Form
 	**/
-	final class FormUtils extends StaticFactory
+	class FormUtils extends StaticFactory
 	{
 		/* void */ public static function object2form(
 			$object, Form $form, $ignoreNull = true
