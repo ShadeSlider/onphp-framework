@@ -487,7 +487,7 @@
 		private function getErrorLabel($name, $errorType)
 		{
 			// checks for primitive's existence
-			$this->get($name);
+			isset($this->rules[$name]) || $this->get($name);
 			
 			if (isset($this->labels[$name][$errorType]))
 				return $this->labels[$name][$errorType];
