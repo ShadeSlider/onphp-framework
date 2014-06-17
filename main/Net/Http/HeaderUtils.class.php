@@ -120,6 +120,17 @@
 			self::$headerSent = true;
 		}
 		
+		public static function sendContentType($contentType)
+		{
+			if($contentType instanceof ContentTypeHeader) {
+				$contentType = $contentType->toString();
+			}
+
+			header("Content-Type: {$contentType}");
+
+			self::$headerSent = true;
+		}
+
 		public static function sendContentLength($length)
 		{
 			Assert::isInteger($length);
