@@ -25,7 +25,7 @@
 		{
 			return new self;
 		}
-		
+
 		/**
 		 * @return FilterChain
 		**/
@@ -33,6 +33,31 @@
 		{
 			$this->chain[] = $filter;
 			return $this;
+		}
+
+		/**
+		 * @return FilterChain
+		 */
+		public function merge(FilterChain $chain)
+		{
+			$this->chain = array_merge($this->chain, $chain->getList());
+			return $this;
+		}
+
+		/**
+		 * @return bool
+		 */
+		public function isEmpty()
+		{
+			return count($this->chain) == 0;
+		}
+
+		/**
+		 * @return array
+		 */
+		public function getList()
+		{
+			return $this->chain;
 		}
 
 		/**
