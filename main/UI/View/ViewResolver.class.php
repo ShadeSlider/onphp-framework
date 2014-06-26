@@ -9,16 +9,21 @@
  *                                                                         *
  ***************************************************************************/
 
+/**
+ * @ingroup Flow
+ * @ingroup Module
+**/
+interface ViewResolver
+{
 	/**
-	 * @ingroup Flow
-	 * @ingroup Module
+	 * @param	$viewName	string
+	 * @return	View
 	**/
-	interface ViewResolver
-	{
-		/**
-		 * @param	$viewName	string
-		 * @return	View
-		**/
-		public function resolveViewName($viewName);
-	}
-?>
+	public function resolveViewName($viewName);
+
+	/**
+	 * @param   $viewName   string
+	 * @return  bool
+	 */
+	public function viewExists($viewName);
+}
