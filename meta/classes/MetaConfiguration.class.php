@@ -310,7 +310,7 @@
 			$schema = SchemaBuilder::getHead();
 			
 			$tables = array();
-			
+
 			foreach ($this->classes as $class) {
 				if (
 					(!$class->getParent() && !count($class->getProperties()))
@@ -318,19 +318,23 @@
 				) {
 					continue;
 				}
-				
-				foreach ($class->getAllProperties() as $property)
+
+				foreach ($class->getAllProperties() as $property) {
 					$tables[
 						$class->getTableName()
 					][
 						// just to sort out dupes, if any
 						$property->getColumnName()
 					] = $property;
+				}
 			}
 			
-			foreach ($tables as $name => $propertyList)
-				if ($propertyList)
+			foreach ($tables as $name => $propertyList) {
+				if ($propertyList) {
 					$schema .= SchemaBuilder::buildTable($name, $propertyList);
+				}
+			}
+
 			
 			foreach ($this->classes as $class) {
 				if (!$class->getPattern()->tableExists()) {
@@ -1399,6 +1403,14 @@
 						$property->getType()->setDefault(
 							(string) $xmlProperty['default']
 						);
+					}
+
+					if(isset($xmlProperty['index'])) {
+						$property->setIndex((string)$xmlProperty['index']);
+					}
+
+					if(isset($xmlProperty['unique'])) {
+						$property->setUnique((string)$xmlProperty['unique']);
 					}
 					
 					$class->addProperty($property);

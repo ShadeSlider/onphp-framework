@@ -260,10 +260,67 @@
 				
 				$table->addColumn($column);
 			}
-			
+
+			$indexes = $this->getTableIndexes($table);
+			$uniques = $this->getTableIndexes($table, true);
+
+			foreach ($indexes as $indexName => $indexFields) {
+				call_user_func_array(array($table, 'addNamedIndex'), array_merge(array($indexName), $indexFields));
+			}
+			foreach ($uniques as $uniqueName => $uniqueFields) {
+				call_user_func_array(array($table, 'addNamedUnique'), array_merge(array($uniqueName), $uniqueFields));
+			}
+
 			return $table;
 		}
-		
+
+		public function getTableIndexes($tableName, $getUniques = false)
+		{
+			if($tableName instanceof DBTable) {
+				$tableName = $tableName->getName();
+			}
+
+			$getUniquesString = $getUniques ? 'true' : 'false';
+			$indexesResult = $this->queryRaw("
+				select
+				    idx.relname as index_name,
+				    attr.attname as column_name,
+				    ix.indisunique as is_unique
+				from
+				    pg_class tbl,
+				    pg_class idx,
+				    pg_index ix,
+				    pg_attribute attr
+				where
+				    tbl.oid = ix.indrelid
+				    and ix.indisprimary = false
+				    and ix.indisunique = {$getUniquesString}
+				    and idx.oid = ix.indexrelid
+				    and attr.attrelid = tbl.oid
+				    and attr.attnum = ANY(ix.indkey)
+				    and tbl.relkind = 'r'
+				    and tbl.relname = '{$tableName}'
+			");
+
+			$indexesData = pg_fetch_all($indexesResult);
+
+			if(!is_array($indexesData)) {
+				return array();
+			}
+
+			$indexes = array();
+			foreach ($indexesData as $indexData) {
+				$indexName = $indexData['index_name'];
+				if(!isset($indexes[$indexName])) {
+					$indexes[ $indexName ] = array();
+				}
+
+				$indexes[$indexName][] = $indexData['column_name'];
+			}
+
+			return $indexes;
+		}
+
 		/**
 		 * @return PostgresDialect
 		**/

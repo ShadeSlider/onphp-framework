@@ -176,7 +176,7 @@
 		{
 			throw new UnimplementedFeatureException();
 		}
-		
+
 		protected function getLink()
 		{
 			if (!$this->db)
@@ -186,6 +186,69 @@
 			}
 			
 			return $this->db->getLink();
+		}
+
+		public function postCreateTable(DBTable $table)
+		{
+			return '';
+		}
+
+		public function makeIndexName($name, $tableName, $uniqueIndex = false)
+		{
+			$suffix = $uniqueIndex ? 'uidx' : 'idx';
+
+			if($tableName instanceof DBTable) {
+				$tableName = $tableName->getName();
+			}
+
+			$indexName = '';
+			if(is_numeric($name)) {
+				$indexName .= $tableName . '_' . $suffix . '__' . $name;
+			}
+			else {
+				$indexName = $name . '_' .$suffix . '__' . $tableName;
+			}
+
+			return $indexName;
+		}
+
+		public function makeCreateIndex($name, $table, $fields = array(), $uniqueIndex = false, $nameIsFinal = false)
+		{
+			if(!is_array($fields)) {
+				$fields = array($fields);
+			}
+
+			$tableName = $table;
+			if($table instanceof DBTable) {
+				$tableName = $table->getName();
+			}
+			$indexName = $nameIsFinal ? $name : $this->makeIndexName($name, $tableName, $uniqueIndex);
+
+			$fieldNames = array();
+			foreach ($fields as $name) {
+				$fieldNames[] = $this->quoteField($name);
+			}
+
+			$out = 'CREATE';
+
+			if($uniqueIndex) {
+				$out .= ' UNIQUE';
+			}
+
+			$out .= ' INDEX ' . $this->quoteTable($indexName) . ' ON ' . $this->quoteTable($tableName) . '(' . implode(', ', $fieldNames) . ')';
+
+			return $out . ";\n";
+		}
+
+		public function makeDropIndex($name, $table, $uniqueIndex = false, $nameIsFinal = false)
+		{
+			$indexName = $nameIsFinal ? $name : $this->makeIndexName($name, $table, $uniqueIndex);
+			return 'DROP INDEX ' . $this->quoteTable($indexName) . ";\n";
+		}
+
+		public function isAutoIndex($indexName)
+		{
+			return (bool)preg_match('/^(?:[\w_0-9]+?)(?:_u?idx__)([\w_0-9]+)$/i', $indexName);
 		}
 	}
 ?>

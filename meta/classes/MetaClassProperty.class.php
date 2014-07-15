@@ -28,7 +28,10 @@
 		private $relation	= null;
 		
 		private $strategy	= null;
-		
+
+		private $unique	    = null;
+		private $index	    = null;
+
 		public function __construct(
 			$name,
 			BasePropertyType $type,
@@ -250,6 +253,29 @@
 			
 			return null;
 		}
+
+		public function setIndex($index)
+		{
+			$this->index = $index;
+			return $this;
+		}
+
+		public function getIndex()
+		{
+			return $this->index;
+		}
+
+		public function setUnique($unique)
+		{
+			$this->unique = $unique;
+			return $this;
+		}
+
+		public function getUnique()
+		{
+			return $this->unique;
+		}
+
 		
 		public function toMethods(
 			MetaClass $class,
@@ -512,7 +538,7 @@ EOT;
 			
 			return $column;
 		}
-		
+
 		private function toVarName($name)
 		{
 			return strtolower($name[0]).substr($name, 1);

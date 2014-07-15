@@ -36,6 +36,8 @@
 		column		CDATA #IMPLIED
 		default		CDATA #IMPLIED
 		required	(true|false) "false"
+		unique	    CDATA "false"
+		index	    CDATA "false"
 		relation	(OneToOne|OneToMany|ManyToMany) #IMPLIED
 		fetch		(lazy|cascade) #IMPLIED
 >

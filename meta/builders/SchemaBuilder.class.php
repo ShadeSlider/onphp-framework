@@ -22,27 +22,132 @@
 		DBTable::create('{$tableName}')->
 
 EOT;
-
+			$propertyNames = array_keys($propertyList);
 			$columns = array();
-			
+			$uniques = array();
+			$indexes = array();
+
+			/** @var MetaClassProperty $property */
 			foreach ($propertyList as $property) {
+
 				if (
 					$property->getRelation()
 					&& ($property->getRelationId() != MetaRelation::ONE_TO_ONE)
 				) {
 					continue;
 				}
+
+				
+				/** Gathering indexes data */
+				$indexName = $property->getIndex();
+				if (
+					(
+						$property->getRelation()
+						&& ($property->getRelationId() == MetaRelation::ONE_TO_ONE)
+					)
+					|| $indexName !== "false"
+				) {
+
+					while(true) {
+						if($indexName === "false") {
+							break;
+						}
+
+						try {
+
+							$type = $property->getType();
+							if($type instanceof ObjectType) {
+								$type->getClass();
+								$indexes[$property->getColumnName()] = array($property->getColumnName());
+							}
+						} catch(MissingElementException $e) {
+							/* Internal class, no index is needed by default */
+						}
+
+						if(
+							$indexName === "true"
+						) {
+							$indexes[$property->getColumnName()] = array($property->getColumnName());
+							break;
+						}
+
+						if($indexName === null) {
+							break;
+						}
+
+						if(in_array($indexName, $propertyNames)) {
+							throw new WrongArgumentException('Wrong index name ' . $indexName . '. Index name cannot be the same as any column name');
+						}
+
+						if(!isset($indexes[$indexName])) {
+							$indexes[$indexName] = array();
+						}
+
+						$indexes[$indexName][] = $property->getColumnName();
+						break;
+					}
+				}
+
+				
+				/** Gathering uniques data */
+				$uniqueName = $property->getUnique();
+
+				while(true) {
+					if($uniqueName === "false" || $uniqueName === null) {
+						break;
+					}
+
+					if(
+						$uniqueName === "true"
+					) {
+						$uniques[$property->getColumnName()] = array($property->getColumnName());
+						break;
+					}
+
+					if(in_array($uniqueName, $propertyNames)) {
+						throw new WrongArgumentException('Wrong unique index name ' . $indexName . '. Unique index name cannot be the same as any column name');
+					}
+
+					if(!isset($uniques[$uniqueName])) {
+						$uniques[$uniqueName] = array();
+					}
+
+					$uniques[$uniqueName][] = $property->getColumnName();
+					break;
+				}
+
 				
 				$column = $property->toColumn();
 				
-				if (is_array($column))
+				if (is_array($column)) {
 					$columns = array_merge($columns, $column);
-				else
+				}
+				else {
 					$columns[] = $property->toColumn();
+				}
 			}
 			
-			$out .= implode("->\n", $columns);
-			
+			$out .=
+				implode("->\n", $columns);
+
+			$lastUnique = end($uniques);
+			foreach ($uniques as $uniqueName => $uniqueData) {
+				$uniqueFieldsString = '"' . implode('", "', $uniqueData) . '"';
+
+				$out .= "->\naddNamedUnique('{$uniqueName}', {$uniqueFieldsString})";
+			}
+
+			$lastIndex = end($indexes);
+			foreach ($indexes as $indexName => $indexData) {
+				if(isset($uniques[$indexName])) {
+					continue;
+				}
+
+				$indexFieldsString = '"' . implode('", "', $indexData) . '"';
+
+				$out .= "->\naddNamedIndex('{$indexName}', {$indexFieldsString})";
+			}
+
 			return $out."\n);\n\n";
 		}
 		

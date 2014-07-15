@@ -81,10 +81,13 @@
 
 			$out .= "\n);\n";
 
-			if(method_exists($dialect, 'postCreateTable')) {
-				$out .= $dialect->postCreateTable($this->table);
+			$out .= $dialect->postCreateTable($this->table);
+
+			foreach ($this->table->getIndexes() as $indexName => $indexData) {
+
+				$out .= $dialect->makeCreateIndex($indexName, $this->table, $indexData);
 			}
-			
+
 			return $out;
 		}
 	}

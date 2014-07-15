@@ -163,7 +163,7 @@
 				}
 			}
 
-			return $out;
+			return $out . "\n";
 		}
 		
 		public function quoteIpInRange($range, $ip)
@@ -189,7 +189,7 @@
 		{
 			return $column->getTable()->getName().'_'.$column->getName() . '_seq';
 		}
-		
+
 		private static function checkColumn(DBColumn $column)
 		{
 			Assert::isTrue(
