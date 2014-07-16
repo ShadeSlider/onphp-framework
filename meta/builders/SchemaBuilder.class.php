@@ -40,83 +40,53 @@ EOT;
 				
 				/** Gathering indexes data */
 				$indexName = $property->getIndex();
-				if (
-					(
-						$property->getRelation()
-						&& ($property->getRelationId() == MetaRelation::ONE_TO_ONE)
-					)
-					|| $indexName !== "false"
+				if($indexName === "true") {
+					$indexes[$property->getColumnName()] = array($property->getColumnName());
+				}
+				elseif(in_array($indexName, $propertyNames)) {
+					throw new WrongArgumentException('Wrong index name ' . $indexName . '. Index name cannot be the same as any column name');
+				}
+				elseif(
+					$property->getRelation()
+					&& ($property->getRelationId() == MetaRelation::ONE_TO_ONE)
 				) {
-
-					while(true) {
-						if($indexName === "false") {
-							break;
-						}
-
-						try {
-
-							$type = $property->getType();
-							if($type instanceof ObjectType) {
-								$type->getClass();
-								$indexes[$property->getColumnName()] = array($property->getColumnName());
-							}
-						} catch(MissingElementException $e) {
-							/* Internal class, no index is needed by default */
-						}
-
-						if(
-							$indexName === "true"
-						) {
+					try {
+						$propertyType = $property->getType();
+						if($propertyType instanceof ObjectType) {
+							$propertyType->getClass(); //Check if class is internal
 							$indexes[$property->getColumnName()] = array($property->getColumnName());
-							break;
 						}
-
-						if($indexName === null) {
-							break;
-						}
-
-						if(in_array($indexName, $propertyNames)) {
-							throw new WrongArgumentException('Wrong index name ' . $indexName . '. Index name cannot be the same as any column name');
-						}
-
-						if(!isset($indexes[$indexName])) {
-							$indexes[$indexName] = array();
-						}
-
-						$indexes[$indexName][] = $property->getColumnName();
-						break;
+					} catch(MissingElementException $e) {
+						/* Internal class, no index is needed by default */
 					}
 				}
+				elseif($indexName !== "false" && $indexName !== null) {
+					if(!isset($indexes[$indexName])) {
+						$indexes[$indexName] = array();
+					}
 
-				
+					$indexes[$indexName][] = $property->getColumnName();
+				}
+
+
 				/** Gathering uniques data */
 				$uniqueName = $property->getUnique();
 
-				while(true) {
-					if($uniqueName === "false" || $uniqueName === null) {
-						break;
-					}
-
-					if(
-						$uniqueName === "true"
-					) {
-						$uniques[$property->getColumnName()] = array($property->getColumnName());
-						break;
-					}
-
-					if(in_array($uniqueName, $propertyNames)) {
-						throw new WrongArgumentException('Wrong unique index name ' . $indexName . '. Unique index name cannot be the same as any column name');
-					}
-
+				if($uniqueName === "true") {
+					$uniques[$property->getColumnName()] = array($property->getColumnName());
+				}
+				elseif (in_array($uniqueName, $propertyNames)) {
+					throw new WrongArgumentException('Wrong unique index name ' . $indexName . '. Unique index name cannot be the same as any column name');
+				}
+				elseif($uniqueName !== "false" && $uniqueName !== null) {
 					if(!isset($uniques[$uniqueName])) {
 						$uniques[$uniqueName] = array();
 					}
 
 					$uniques[$uniqueName][] = $property->getColumnName();
-					break;
 				}
 
-				
+
 				$column = $property->toColumn();
 				
 				if (is_array($column)) {
