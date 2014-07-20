@@ -19,7 +19,7 @@
 		private $identityMap	= array();
 		
 		protected $linkName		= null;
-		
+
 		abstract public function getTable();
 		abstract public function getObjectName();
 		
@@ -103,7 +103,14 @@
 		{
 			return $this->getProtoClass()->getMapping();
 		}
-		
+
+		public function getMappedField($fieldAlias)
+		{
+			$mapping = $this->getMapping();
+
+			return isset($mapping[$fieldAlias]) ? $mapping[$fieldAlias] : $fieldAlias;
+		}
+
 		public function getFields()
 		{
 			static $fields = array();
