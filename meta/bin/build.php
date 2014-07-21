@@ -45,7 +45,7 @@ Possible options:
 		run alter tables queries for suggested schema changes.
 
 	--sql-log-file:
-		if supplied along with --create-tables and/or --run-alter-table-queries will write changes to the spicified file.
+		if supplied along with --create-tables and/or --run-alter-table-queries will write changes to the specified file.
 
 <?php
 		exit(1);
