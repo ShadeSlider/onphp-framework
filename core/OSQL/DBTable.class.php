@@ -301,7 +301,7 @@
 
 					if($column->isAutoincrement()) {
 						$out[] = 'ALTER TABLE "'.$target->getName().'" ADD PRIMARY KEY("'.$column->getName().'");';
-						/** Since source table did have autoincrement before, we assume it has just been created. */
+						/** Since source table didn't have autoincrement before, we assume it has just been created. */
 						$postCreateTable = array($dialect->postCreateTable($target));
 					}
 				}
