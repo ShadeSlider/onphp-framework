@@ -29,7 +29,7 @@ If several properties have the same index / unique name a multi column index wil
 ---
 
 ###Usage:
-Given meta
+Given meta (pay attention to 'index' and 'unique' attributes)
 ```xml
 <!-- Employee -->
 <class name="Employee">
