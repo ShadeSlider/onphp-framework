@@ -2,7 +2,9 @@
 
 ###This fork of onPHP has several convenient features added:
   
-<b></b>
+  
+<b></b>  
+
 
 ####New meta builder options for automatic table creation and SQL queries execution:
 1. **--run-alter-table-queries** - automatically execute suggested SQL queries.
@@ -10,9 +12,9 @@
 3. **--sql-log-file** - if supplied along with --create-tables and/or --run-alter-table-queries will write changes to the specified file.
 
 ---
-###This fork of onPHP has several convenient features added:
-  
-<b></b>
+
+
+<b></b>  
 
 
 ####New meta attributes for managing regular and unique indexes in a database:
