@@ -52,7 +52,7 @@ Given the following meta
 <!-- @end Employee -->
 ```
 
-running this command with a PostgreSQL connection set up
+running the following command with a PostgreSQL connection set up
 
 ```bash
 php <PATH_TO_BUILDER>/build.php --run-alter-table-queries --create-tables --sql-log-file=db/sql/onphp_log_`date +%Y_%m_%d`.sql <PATH_TO_CONFIG>config.inc.php <PATH_TO_META>meta.xml
