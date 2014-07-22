@@ -12,14 +12,15 @@ onPHP-framework extended
 Meta now supports 2 new attributes for **<property>** tag: **index** and **unique**.
 Both attributes can have 3 types of value:  
 
-1. **"true"** - create index / unique index for this column.
+1\. **"true"** - create index / unique index for this column.
 
-2. **"false"** - never create index for this column. Also drops existing index if it's name matches following regex:  
+2\. **"false"** - never create index for this column. Also drops existing index if it's name matches following regex:  
 ```regex
-**/^(?:[\w_0-9]+?)(?:_u?idx__)([\w_0-9]+)$/i**
-```  
+/^(?:[\w_0-9]+?)(?:_u?idx__)([\w_0-9]+)$/i
+```
 
-3. **"\<index_name\>"** - create index / unique index with a name **\<index_name\>**. If several properties have the same index / unique name a multi column index will be created.
+3\. **"\<index_name\>"** - create index / unique index with a name **\<index_name\>**.  
+If several properties have the same index / unique name a multi column index will be created.
 
 
 ---
