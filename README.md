@@ -1,14 +1,14 @@
-onPHP-framework extended
-===============
+#onPHP-framework extended
 
 ##This fork of onPHP has several convenient features added:
-###- new meta builder options for automatic table creation and SQL queries execution:
+###New meta builder options for automatic table creation and SQL queries execution:
 1. **--run-alter-table-queries** - automatically execute suggested SQL queries.
 2. **--create-tables** - if --run-alter-table-queries is specified, create missing tables.
 3. **--sql-log-file** - if supplied along with --create-tables and/or --run-alter-table-queries will write changes to the specified file.
 
+---
 
-###- new meta attributes for managing regular and unique indexes in a database:
+###New meta attributes for managing regular and unique indexes in a database:
 Meta now supports 2 new attributes for **<property>** tag: **index** and **unique**.
 Both attributes can have 3 types of value:  
 
