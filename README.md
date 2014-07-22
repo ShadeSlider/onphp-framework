@@ -1,7 +1,7 @@
 #onPHP-framework extended
 
 ###This fork of onPHP has several convenient features added:
----
+===
 ####New meta builder options for automatic table creation and SQL queries execution:
 1. **--run-alter-table-queries** - automatically execute suggested SQL queries.
 2. **--create-tables** - if --run-alter-table-queries is specified, create missing tables.
