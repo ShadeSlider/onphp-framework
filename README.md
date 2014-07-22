@@ -11,8 +11,11 @@ onPHP-framework extended
 ###- new meta attributes for managing regular and unique indexes in a database:
 Meta now supports 2 new attributes for **<property>** tag: **index** and **unique**.
 Both attributes can have 3 types of value:  
-1. **"true"** - create index / unique index for this column.  
-2. **"false"** - never create index for this column. Also drops existing index if it's name matches following regex: **/^(?:[\w_0-9]+?)(?:_u?idx__)([\w_0-9]+)$/i**  
+1. **"true"** - create index / unique index for this column.
+
+2. **"false"** - never create index for this column. Also drops existing index if it's name matches following regex:  
+**/^(?:[\w_0-9]+?)(?:_u?idx__)([\w_0-9]+)$/i**  
+
 3. **"\<index_name\>"** - create index / unique index with a name **\<index_name\>**. If several properties have the same index / unique name a multi column index will be created.
 
 
@@ -49,7 +52,7 @@ php <PATH_TO_BUILDER>/build.php --run-alter-table-queries --create-tables --sql-
 ```
 
 will result in the following SQL to be executed and written (appended) to a  
-***\<PROJECT_ROOT\>db/sql/onphp_log_2014_07_22.sql***  
+**\<PROJECT_ROOT\>db/sql/onphp_log_2014_07_22.sql**  
 file (current date will be used, of course)
 ```sql
 CREATE TABLE "employee" (
