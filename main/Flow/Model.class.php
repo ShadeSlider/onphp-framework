@@ -64,7 +64,7 @@
 		
 		public function has($name)
 		{
-			return isset($this->vars[$name]);
+			return array_key_exists($name, $this->vars);
 		}
 		
 		/**
