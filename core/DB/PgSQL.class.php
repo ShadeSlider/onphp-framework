@@ -96,6 +96,9 @@
 		public function queryRaw($queryString)
 		{
 			try {
+				if(isset($_GET['sqldebug'])) {
+					echo "<pre>$queryString</pre>";
+				}
 				return pg_query($this->link, $queryString);
 			} catch (BaseException $e) {
 				// manual parsing, since pg_send_query() and
@@ -220,7 +223,7 @@
 					select c.relname
 						from pg_catalog.pg_class c
 						where
-								c.relkind = 'r'
+								c.relkind in('r', 'm', 'v')
 							and c.relname = '".$table."'
 				");
 				$tableData = pg_fetch_assoc($tableDataRes);
