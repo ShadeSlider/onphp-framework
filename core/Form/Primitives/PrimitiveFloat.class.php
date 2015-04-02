@@ -21,7 +21,7 @@
 		
 		protected function castNumber($number)
 		{
-			return (float) $number;
+			return str_replace(',', '.', (float) $number);
 		}
 	}
 ?>
