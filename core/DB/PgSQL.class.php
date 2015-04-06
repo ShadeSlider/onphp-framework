@@ -96,7 +96,7 @@
 		public function queryRaw($queryString)
 		{
 			try {
-				if(isset($_GET['sqldebug'])) {
+				if(isset($_REQUEST['sqldebug'])) {
 					echo "<pre>$queryString</pre>";
 				}
 				return pg_query($this->link, $queryString);
