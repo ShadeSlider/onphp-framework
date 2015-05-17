@@ -462,7 +462,11 @@
 					foreach ($diff as $line) {
 						$out->warningLine($line);
 						if($this->isRunAlterTableQueries() && !$this->isDryRun()) {
-							$db->queryRaw($line);
+							try {
+								$db->queryRaw($line);
+							} catch(Exception $e) {
+								$out->error('Unable to execute query. Reason:' . "\n". $e->getMessage());		
+							}
 						}
 						$sqlLog[] = $line;
 					}
