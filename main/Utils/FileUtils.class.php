@@ -137,7 +137,18 @@
 			return time().'_'.uniqid().$extension;
 
 		}
+
+
+		public static function makeDirIfNotExist($directory, $mode = 0770, $recursive = true)
+		{
+			if (!file_exists($directory)) {
+				$oldUmask = umask(0);
+				mkdir($directory, $mode, $recursive);
+				umask($oldUmask);
+			}
+		}
 		
+
 		/* void */ public static function removeDirectory($directory, $recursive = false)
 		{
 			if (!$recursive) {
